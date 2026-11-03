@@ -101,12 +101,33 @@ See `docs/api-backend-plan.md`:
 - Board details live in `Description` text (no separate guest/deposit fields in v1)
 - Overlap: service + DB exclusion
 
+## Docker (API + PostgreSQL)
+
+Frontend stays on Vercel (or similar). Backend stack:
+
+```powershell
+copy .env.example .env
+# Edit .env: POSTGRES_PASSWORD, JWT_SIGNING_KEY, CORS_ORIGIN_0, AdminBootstrap, …
+
+docker compose up -d --build
+docker compose --profile migrate run --rm migrate
+```
+
+- API: `http://localhost:8080` (or `API_PUBLISH_PORT`)
+- Postgres: Docker network only (not published)
+- TLS reverse proxy: set `API_HOST`, DNS A record, then `docker compose --profile tls up -d`
+
+Do **not** commit `.env`. Production: no auto-`Migrate()` on API startup — use the `migrate` profile (or run `dotnet ef` against the DB).
+
 ## Solution layout
 
 ```text
 IgloReservation/
   IgloReservation.sln
   AGENTS.md
+  docker-compose.yml
+  .env.example
+  deploy/Caddyfile
   docs/api-backend-plan.md
   scripts/
   src/IgloReservation.Api/

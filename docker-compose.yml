@@ -1,0 +1,109 @@
+# IgloReservation backend stack: PostgreSQL + API (+ optional Caddy TLS).
+# Frontend is deployed separately (e.g. Vercel).
+#
+# Local / VPS (HTTP API on :8080):
+#   cp .env.example .env   # then edit secrets
+#   docker compose up -d --build
+#   docker compose --profile migrate run --rm migrate
+#
+# Production TLS (needs DNS A record for API_HOST → VPS IP):
+#   docker compose --profile tls up -d --build
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-IgloReservationDb}
+      POSTGRES_USER: ${POSTGRES_USER:-iglo_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - iglo_internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    # Not published by default — only reachable on the Docker network.
+
+  api:
+    build:
+      context: .
+      dockerfile: src/IgloReservation.Api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-IgloReservationDb};Username=${POSTGRES_USER:-iglo_app};Password=${POSTGRES_PASSWORD}
+      Jwt__Issuer: ${JWT_ISSUER:-IgloReservation}
+      Jwt__Audience: ${JWT_AUDIENCE:-IgloReservation}
+      Jwt__AccessTokenMinutes: ${JWT_ACCESS_TOKEN_MINUTES:-60}
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:?Set JWT_SIGNING_KEY in .env}
+      AdminBootstrap__Email: ${ADMIN_BOOTSTRAP_EMAIL:-}
+      AdminBootstrap__Password: ${ADMIN_BOOTSTRAP_PASSWORD:-}
+      # Extra origins: add Cors__AllowedOrigins__1, __2, ... in an override or here.
+      Cors__AllowedOrigins__0: ${CORS_ORIGIN_0:-}
+      Cors__AllowedOrigins__1: ${CORS_ORIGIN_1:-}
+      BusinessTimezone: Europe/Istanbul
+    ports:
+      - "${API_PUBLISH_PORT:-8080}:8080"
+    networks:
+      - iglo_internal
+
+  # One-shot EF migration (requires SDK + source mount). Does not run on normal up.
+  migrate:
+    profiles: ["migrate"]
+    image: mcr.microsoft.com/dotnet/sdk:10.0
+    working_dir: /src
+    volumes:
+      - ./:/src
+    environment:
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-IgloReservationDb};Username=${POSTGRES_USER:-iglo_app};Password=${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - iglo_internal
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -euo pipefail
+        dotnet tool install --global dotnet-ef --version 10.*
+        export PATH="$$PATH:/root/.dotnet/tools"
+        dotnet restore src/IgloReservation.Api/IgloReservation.Api.csproj
+        dotnet ef database update \
+          --project src/IgloReservation.Api/IgloReservation.Api.csproj \
+          --startup-project src/IgloReservation.Api/IgloReservation.Api.csproj
+
+  caddy:
+    profiles: ["tls"]
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      API_HOST: ${API_HOST:?Set API_HOST (e.g. api.example.com) when using profile tls}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - iglo_internal
+
+networks:
+  iglo_internal:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:

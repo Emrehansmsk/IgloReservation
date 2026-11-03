@@ -163,9 +163,12 @@ builder.Services.AddCors(options =>
     {
         var cors = builder.Configuration.GetSection(CorsSettings.SectionName).Get<CorsSettings>()
             ?? new CorsSettings();
-        if (cors.AllowedOrigins.Length > 0)
+        var origins = cors.AllowedOrigins
+            .Where(static o => !string.IsNullOrWhiteSpace(o))
+            .ToArray();
+        if (origins.Length > 0)
         {
-            policy.WithOrigins(cors.AllowedOrigins)
+            policy.WithOrigins(origins)
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         }

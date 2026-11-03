@@ -1,0 +1,7 @@
+# TLS reverse proxy for the API (frontend stays on Vercel).
+# Set API_HOST in .env (e.g. api.example.com). For local smoke tests without TLS, skip the caddy service.
+
+{$API_HOST} {
+	encode gzip
+	reverse_proxy api:8080
+}
