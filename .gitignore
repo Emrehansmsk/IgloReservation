@@ -1,0 +1,35 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+project.lock.json
+artifacts/
+
+## Secrets / local
+**/appsettings.*.local.json
+**/secrets.json
+.env
+.env.*
+!.env.example
+!web/.env.example
+
+## OS / IDE
+.DS_Store
+.idea/
+*.swp
+*~
+
+## Frontend
+web/node_modules/
+web/dist/
+web/.env.local
+web/.env.*.local
+
+## EF / tooling
+*.db
+*.db-shm
+*.db-wal

@@ -1,0 +1,21 @@
+---
+description: Identity, JWT, roles, secrets, CORS, and rate-limiting security rules
+alwaysApply: true
+---
+
+# Security rules
+
+- Use ASP.NET Core Identity and JWT Bearer unless an approved alternative is specified.
+- Roles are `Admin` and `User`; only Admin may perform CRUD/write operations.
+- Public registration can only create User accounts; never accept a requested Admin role.
+- Store secrets outside source control: connection passwords, JWT signing key, bootstrap admin credentials.
+- Use HTTPS in deployed environments.
+- Configure CORS only for approved frontend origins.
+- Configure rate limiting, especially login and write endpoints; return 429 with a useful response.
+- Validate all inputs; use DTOs and server-side validation.
+- Do not log passwords, tokens, connection strings, or sensitive personal data.
+- Use global exception handling and safe ProblemDetails; never expose stack traces in production.
+- Prevent overposting by binding only request DTOs.
+- Apply pagination and reasonable request-size limits.
+- Do not expose PostgreSQL to the public internet; allow only required application access.
+- Protect reservation writes against overlapping bookings and concurrent requests.

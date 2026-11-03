@@ -1,0 +1,18 @@
+---
+description: PostgreSQL and EF Core Code First rules for IgloReservation
+alwaysApply: true
+---
+
+# Database rules
+
+- PostgreSQL is the target database; use EF Core with Npgsql.
+- Use Code First migrations for schema creation and updates.
+- Keep DbContext, entity configurations, and migrations under `Data` (or the standard EF migrations location).
+- Define primary keys, foreign keys, indexes, required fields, max lengths, and delete behaviors explicitly.
+- Use UTC for instants and clearly define the guesthouse's local timezone for reservation display/business rules.
+- Add indexes for common lookup/filter paths.
+- Enforce reservation overlap and integrity constraints at the service and database level where possible.
+- Use decimal/numeric for monetary values; never floating point.
+- Do not commit credentials or production data.
+- Back up before production migrations and verify restore procedures.
+- Do not use EF Core `EnsureCreated()` as a replacement for migrations.

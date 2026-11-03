@@ -1,0 +1,19 @@
+---
+description: REST API design, status codes, DTOs, and ProblemDetails for IgloReservation
+alwaysApply: true
+---
+
+# API design rules
+
+- Use resource-oriented REST routes and plural resource names.
+- Use correct HTTP methods and status codes.
+- Return consistent ProblemDetails for errors.
+- Validate route, query, and body inputs.
+- Use request DTOs and response DTOs; do not expose entities.
+- Paginate collection endpoints; define stable ordering.
+- Use `CreatedAtAction`/201 for successful creates when practical.
+- Use 204 for successful delete when no response body is needed.
+- Return 404 for missing resources, 409 for domain conflicts, 401 for missing/invalid authentication, 403 for insufficient authorization, and 429 for rate limiting.
+- Avoid leaking internal exception messages or database details.
+- Keep endpoint authorization explicit and testable.
+- Add OpenAPI/Swagger documentation for endpoints and auth scheme.

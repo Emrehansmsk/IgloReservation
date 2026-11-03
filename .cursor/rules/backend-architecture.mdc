@@ -1,0 +1,19 @@
+---
+description: Backend architecture rules for IgloReservation API layers and DI
+alwaysApply: true
+---
+
+# Backend architecture rules
+
+- Use ASP.NET Core Web API with C#.
+- Use Controller, Service, Repository, DTO, Entity, and Data/DbContext layers.
+- Controllers depend on service interfaces; services depend on repository interfaces; repositories depend on DbContext.
+- Register dependencies through built-in Dependency Injection.
+- Keep business logic in services, persistence in repositories, and HTTP concerns in controllers.
+- Keep entities under `Models/Entities`; DTOs under `DTOs`; DbContext and EF configurations under `Data`.
+- Do not return EF entities from API endpoints.
+- Use AutoMapper profiles for Entity ↔ DTO mapping; explicitly exclude secrets/internal fields.
+- Use async I/O and propagate `CancellationToken`.
+- Avoid unnecessary abstraction, duplicated logic, static mutable state, and service locator patterns.
+- Use nullable reference types and clear naming.
+- Keep API contracts stable and document changes.
