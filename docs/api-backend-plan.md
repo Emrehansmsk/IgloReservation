@@ -65,6 +65,7 @@ Living summary of locked decisions and what is in the codebase / local database.
 
 ## Endpoints (current)
 
+- `GET /health` — anonymous liveness/readiness (includes EF DbContext / Postgres check); used by Docker healthcheck
 - `api/auth` — login, register, me
 - `api/reservations` — CRUD (writes Admin-only)
 - `api/iglo-units` — CRUD (writes Admin-only)
@@ -78,7 +79,6 @@ Living summary of locked decisions and what is in the codebase / local database.
 
 ## Open / next items
 
-- Health check endpoint
 - Optional: expand audit coverage; structured guest/deposit fields if product outgrows `Description`
 - Iglo unit management UI (currently API/Swagger)
 

@@ -56,6 +56,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<ApplicationDbContext>("database");
+
 builder.Services
     .AddIdentityCore<ApplicationUser>(options =>
     {
@@ -194,6 +197,7 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 // Business timezone for domain rules/display: Europe/Istanbul (see BusinessTimezone.IanaId). Instants stored UTC.
 _ = BusinessTimezone.IanaId;

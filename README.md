@@ -114,6 +114,7 @@ docker compose --profile migrate run --rm migrate
 ```
 
 - API: `http://localhost:8080` (or `API_PUBLISH_PORT`)
+- Health: `GET /health` (anonymous; checks Postgres via EF)
 - Postgres: Docker network only (not published)
 - TLS reverse proxy: set `API_HOST`, DNS A record, then `docker compose --profile tls up -d`
 

@@ -22,8 +22,13 @@ ENV ASPNETCORE_ENVIRONMENT=Production
 
 EXPOSE 8080
 
-COPY --from=build /app/publish .
-
+# curl is used by the compose healthcheck against GET /health
+USER root
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
 USER $APP_UID
+
+COPY --from=build /app/publish .
 
 ENTRYPOINT ["dotnet", "IgloReservation.Api.dll"]

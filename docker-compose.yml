@@ -55,6 +55,12 @@ services:
       - "${API_PUBLISH_PORT:-8080}:8080"
     networks:
       - iglo_internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
   # One-shot EF migration (requires SDK + source mount). Does not run on normal up.
   migrate:
@@ -86,7 +92,8 @@ services:
     image: caddy:2-alpine
     restart: unless-stopped
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     environment:
       API_HOST: ${API_HOST:?Set API_HOST (e.g. api.example.com) when using profile tls}
     ports:
