@@ -1,15 +1,16 @@
 # Multi-stage build for IgloReservation.Api (.NET 10).
-# Build from repository root:
-#   docker build -f src/IgloReservation.Api/Dockerfile -t iglo-api .
+# Build context = this folder (src/IgloReservation.Api), e.g.:
+#   docker build -t iglo-api .
+# Cloud Run continuous deploy: Dockerfile path src/IgloReservation.Api/Dockerfile
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-COPY src/IgloReservation.Api/IgloReservation.Api.csproj src/IgloReservation.Api/
-RUN dotnet restore src/IgloReservation.Api/IgloReservation.Api.csproj
+COPY IgloReservation.Api.csproj .
+RUN dotnet restore IgloReservation.Api.csproj
 
-COPY src/IgloReservation.Api/ src/IgloReservation.Api/
-RUN dotnet publish src/IgloReservation.Api/IgloReservation.Api.csproj \
+COPY . .
+RUN dotnet publish IgloReservation.Api.csproj \
     -c Release \
     -o /app/publish \
     /p:UseAppHost=false

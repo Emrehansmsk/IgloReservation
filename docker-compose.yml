@@ -31,8 +31,8 @@ services:
 
   api:
     build:
-      context: .
-      dockerfile: src/IgloReservation.Api/Dockerfile
+      context: ./src/IgloReservation.Api
+      dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
       postgres:
